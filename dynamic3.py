@@ -58,7 +58,6 @@ dython.nominal.associations(src, plot=True, cmap='coolwarm')
 # Duration and Cost have very high correlation (0.93). We will do PCA on these components.
 scaler = StandardScaler()
 src[['Duration', 'Cost']] = scaler.fit_transform(src[['Duration', 'Cost']])
-
 pca = PCA(n_components=1)
 pca_results = pca.fit_transform(src[['Duration', 'Cost']])
 src.drop(columns=['Duration', 'Cost'], inplace=True)

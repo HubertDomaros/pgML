@@ -1,9 +1,15 @@
+from typing import Dict, Any
+
 import kagglehub
 import os
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import xgboost
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+
 
 def download_and_prepare_dataset() -> pd.DataFrame:
     path = kagglehub.dataset_download("arashnic/dynamic-pricing-dataset")
@@ -34,3 +40,33 @@ def plot_z_scored_num_distributions(data: pd.DataFrame) -> None:
         ax.set_ylabel('Density')
     plt.tight_layout()
     plt.show()
+
+def print_feature_importances(model: xgboost.XGBRegressor, feature_names: list[str]) -> None:
+    for name, importance in zip(feature_names, model.feature_importances_):
+        print(f'Feature: {name}, Importance: {importance}')
+
+
+def train_and_evaluate_model(data: pd.DataFrame, target_column: str, test_size: float = 0.2,
+                             random_state: int = 42) -> dict[str, float | dict[str, Any] | Any]:
+    # Separating features and target variable
+    X = data.drop(columns=[target_column])
+    y = data[target_column]
+
+    # Splitting dataset into training and testing
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+    # Initializing and fitting the XGBoost Regressor
+    model = xgboost.XGBRegressor(objective='reg:squarederror')
+    model.fit(X_train, y_train)
+
+    # Making predictions
+    y_pred = model.predict(X_test)
+
+    # Calculating and printing metrics
+    mse = mean_squared_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+
+    print(f'Mean Squared Error: {mse}')
+    print(f'R^2 Score: {r2}')
+    feature_importances = {'feature': X.columns.tolist()}
+    return {"mse": mse, "r2": r2}
