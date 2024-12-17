@@ -120,8 +120,5 @@ print(f'Score after transformation: {new_score}')
 # Print feature importances
 for name, importance in zip(feature_names, xgb_model.feature_importances_):
     print(f'Feature: {name}, Importance: {importance}')
-        
-        
-        
 
 print(score, new_score, score - new_score)
